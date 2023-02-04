@@ -42,7 +42,7 @@
             if(email!="" && password!=""){
                 signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    window.location = "../Home.htm";
+                    window.location = "../Home.html";
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -71,7 +71,7 @@
                 // The signed-in user info.
                 const user = JSON.stringify(result.user);
                 
-                window.location = "../Home.htm";
+                window.location = "../Home.html";
             }).catch((error) => {
                 // Handle Errors here.
                 const errorCode = error.code;
@@ -98,7 +98,7 @@
                 const credential = FacebookAuthProvider.credentialFromResult(result);
                 const accessToken = credential.accessToken;     
                 
-                window.location = "../Home.htm";
+                window.location = "../Home.html";
             })
             .catch((error) => {
                 // Handle Errors here.

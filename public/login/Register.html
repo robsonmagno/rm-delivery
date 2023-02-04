@@ -83,7 +83,7 @@
 
                     // Add a new document with a generated id.
                     const docRef = addDoc(collection(db, "users", userCredential.user.uid), docData).then((ret) => {
-                        window.location = "../Home.php";
+                        window.location = "../Home.html";
                     });
                     
                 })
@@ -134,7 +134,7 @@
 
                 // Add a new document with a generated id.
                 const docRef = addDoc(collection(db, "users", result.user.uid), docData).then((ret) => {
-                    window.location = "../Home.php";
+                    window.location = "../Home.html";
                 });
             }).catch((error) => {
                 // Handle Errors here.
@@ -181,7 +181,7 @@
 
                 // Add a new document with a generated id.
                 const docRef = addDoc(collection(db, "users", result.user.uid), docData).then((ret) => {
-                    window.location = "../Home.php";
+                    window.location = "../Home.html";
                 });
             })
             .catch((error) => {
@@ -213,7 +213,7 @@
                                 <h1 class="h4 text-gray-900 mb-4">Criar Conta</h1>
                             </div>
                             <div class="text-center alert alert-danger" style="display: none;" id="alert"></div>
-                            <form class="user" name="registerForm" id="registerForm" method="post" action="registerAction.php">
+                            <form class="user" name="registerForm" id="registerForm" method="post">
                                 <input type="hidden" id="user" name="user" />
                                 <div class="form-group">
                                     <input type="text" class="form-control form-control-user" id="user_name" name="user_name"
@@ -245,10 +245,10 @@
                             </form>
                             <hr>
                             <div class="text-center">
-                                <a class="small" href="ForgotPassword.php">Esqueci minha senha</a>
+                                <a class="small" href="ForgotPassword.html">Esqueci minha senha</a>
                             </div>
                             <div class="text-center">
-                                <a class="small" href="index.php">Já tem conta? Entre!</a>
+                                <a class="small" href="index.html">Já tem conta? Entre!</a>
                             </div>
                         </div>
                     </div>

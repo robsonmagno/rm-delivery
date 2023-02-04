@@ -23,6 +23,100 @@
         .order-bg {
             background-color: #B0E0E6;
         }
+
+        a {
+        text-decoration: none;
+    }
+
+    /* Card Styles */
+
+    .card-sl {
+        border-radius: 8px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .card-image img {
+        max-height: 100%;
+        max-width: 100%;
+        border-radius: 8px 8px 0px 0;
+    }
+
+    .card-action {
+        position: relative;
+        float: right;
+        margin-top: -25px;
+        margin-right: 20px;
+        z-index: 2;
+        color: #E26D5C;
+        background: #fff;
+        border-radius: 100%;
+        padding: 15px;
+        font-size: 15px;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .card-action:hover {
+        color: #fff;
+        background: #E26D5C;
+        -webkit-animation: pulse 1.5s infinite;
+    }
+
+    .card-heading {
+        font-size: 18px;
+        font-weight: bold;
+        background: #fff;
+        padding: 10px 15px;
+    }
+
+    .card-text {
+        padding: 10px 15px;
+        background: #fff;
+        font-size: 14px;
+        color: #636262;
+    }
+
+    .card-button {
+        display: flex;
+        justify-content: center;
+        padding: 10px 0;
+        width: 100%;
+        background-color: #1F487E;
+        color: #fff;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .card-button:hover {
+        text-decoration: none;
+        background-color: #1D3461;
+        color: #fff;
+
+    }
+
+
+    @-webkit-keyframes pulse {
+        0% {
+            -moz-transform: scale(0.9);
+            -ms-transform: scale(0.9);
+            -webkit-transform: scale(0.9);
+            transform: scale(0.9);
+        }
+
+        70% {
+            -moz-transform: scale(1);
+            -ms-transform: scale(1);
+            -webkit-transform: scale(1);
+            transform: scale(1);
+            box-shadow: 0 0 0 50px rgba(90, 153, 212, 0);
+        }
+
+        100% {
+            -moz-transform: scale(0.9);
+            -ms-transform: scale(0.9);
+            -webkit-transform: scale(0.9);
+            transform: scale(0.9);
+            box-shadow: 0 0 0 0 rgba(90, 153, 212, 0);
+        }
+    }
     </style>
 </head>
 
@@ -40,7 +134,7 @@
     // Initialize Firebase Authentication and get a reference to the service
     const auth = getAuth(app);
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             // User is signed in, see docs for a list of available properties
             // https://firebase.google.com/docs/reference/js/firebase.User
@@ -57,7 +151,105 @@
                 
                 $(".user_name").html(profile.displayName);
             });
+            // Initialize Cloud Firestore and get a reference to the service
+            const db = getFirestore(app);
+            const storeRef = collection(db, "stores");            
+            const storeQuery = query(storeRef, where("store_name", "!=", null));
+            const querySnapshot = await getDocs(storeQuery);
             
+            var html = '';
+            querySnapshot.forEach( async (result) => {
+
+                html += '<div class="col-md-4 mt-5">';
+                    html += '<div class="row">';
+                        html += '<div class="col-md-12">';
+                            html += '<div class="card-sl">';
+                                html += '<div class="card-image">';
+                                    html += '<img src="img/HUo988IpYZbvk73FX7lS.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" />';
+                                html += '</div>';
+            
+                                // html .= '<a class="card-action" href="#"><i class="fa fa-heart"></i></a>';
+                            html += '<div class="card-heading">'+result.data().store_name+'</div>';
+                            html += '<div class="card-text">'+result.data().store_address+'</div>';
+                                html += '<div class="card-text">';
+                                    html += '<a href="tel:+'+result.data().store_phone+'"><i class="fas fa-phone"> '+result.data().store_phone+'</i></a>';
+                                html += '</div>';
+                                html += '<a href="#" class="card-button"> Purchase</a>';
+                            html += '</div>';
+                        html += '</div>';
+                    html += '</div>';
+                html += '</div>';
+/*
+                html += '<div class="col-md-4 mt-5">';
+                    html += '<div class="card text-center">';
+                        html += '<div class="card-body">';
+                            //html += '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1153.4719609329472!2d-46.809995080097536!3d-23.74256656108271!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce4d3f5bcd7479%3A0x14b4197599eb26fa!2sR.%20Jacarand%C3%A1%2C%2016%20-%20A%20Definir%2C%20Itapecerica%20da%20Serra%20-%20SP%2C%2006864-720!5e1!3m2!1spt-BR!2sbr!4v1675524622096!5m2!1spt-BR!2sbr" width="100%" height="200" frameborder="0" style="border:0" allowfullscreen></iframe>';
+                            html += '<h5 class="card-title">'+result.data().store_name+'</h5>';
+                            html += '<hr>';
+                            html += '<img class="card-img-top" src="img/HUo988IpYZbvk73FX7lS.jpg?image=231" alt="'+result.data().store_name+'">';
+                            html += '<a href="https://goo.gl/maps/FYCvHkGPZxUrar4o6"><address class="font-italic">'+result.data().store_address+'</address></a>';
+                        html += '</div>';
+                            html += '<div class="card-footer text-muted">';
+                            html += '<div class="row">';
+                                html += '<div class="col">';
+                                    html += '<a href=""><i class="fas fa-map"></i></a>';
+                                html += '</div>';
+                                html += '<div class="col">';
+                                    html += '<a href="tel:+'+result.data().store_phone+'"><i class="fas fa-phone"> '+result.data().store_phone+'</i></a>';
+                                html += '</div>';
+                            html += '</div>';
+                        html += '</div>';
+                    html += '</div>';
+                html += '</div>';
+*/
+                /*
+                html += '<div class="col-xs-12 col-sm-3 col-md-3 border border-primary rounded" style="margin-left: 30px !important;">';
+                    html += '<></b>';
+                    html += '<b>'+result.data().store_address+'</b>';
+                    html += '<b>'+result.data().store_phone+'</b>';
+                html += '</div>';
+                */
+                //console.log();
+                /*switch(result.data().order_status) {
+                    case 10:
+                        status = '<i class="fas fa-lg fa-check text-success"> Entregue</i>';
+                        break;
+                    case 20:
+                        status = '<i class="fas fa-lg fa-truck text-primary"> Entregando</i>';
+                        break;
+                    case 80:
+                        status = '<i class="fas fa-lg fa-undo text-warning"> Retornado</i>';
+                        break;
+                    case 90:
+                        status = '<i class="fas fa-lg fa-times text-danger"> Cancelado</i>';
+                        break;
+                }
+         
+                const storeRef =  doc(db, "stores", result.data().store.id); 
+                const storeSnap = await getDoc(storeRef);
+                var store = storeSnap.data().store_name;
+
+                var dateFormat = new Date(result.data().order_date.toDate())
+
+                var date = dateFormat.getDate()+
+                    "/"+(dateFormat.getMonth()+1)+
+                    "/"+dateFormat.getFullYear()+
+                    " "+dateFormat.getHours()+
+                    ":"+dateFormat.getMinutes();
+
+
+                html += '<div class="row text-dark order-bg list-group-item d-flex justify-content-between align-items-center p-3">';
+                    html += '<div class="col-md-2"><b>'+result.data().order_number+'</b></div>';
+                    html += '<div class="col-md-2"><b>'+date+'</b></div>';
+                    html += '<div class="col-md-4"><b>'+store+'</b></div>';
+                    html += '<div class="col-md-2"><b>R$ '+result.data().order_amount+'</b></div>';
+                    html += '<div class="col-md-2">'+status+'</div>';
+                html += '</div>';
+
+                */
+               $("#stores").append(html);
+               html = '';
+            });
         }
     });
 </script>
@@ -278,95 +470,17 @@
             <!-- End of Topbar -->
             <!-- Begin Page Content -->
             <div class="container-fluid">
-
-<script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
-    import { getFirestore, collection, doc, addDoc, setDoc, getDocs, query, where, getDoc } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
-    
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-
-    const auth = getAuth();
-    onAuthStateChanged(auth, async (user) =>  {
-        if (user) {
-            // User is signed in, see docs for a list of available properties
-            // https://firebase.google.com/docs/reference/js/firebase.User
-            const uid = user.uid;
-
-            // Initialize Cloud Firestore and get a reference to the service
-            const db = getFirestore(app);
-            const userRef =   doc(db, "users", "FkYzcbK7mZ7ZVArItp9G"); 
-            //const docSnap = await getDoc(userRef);
-            //console.log(docSnap.data());
-
-            const ordersRef = collection(db, "orders");            
-            const ordersQuery = query(ordersRef, where("uid", "==", userRef));
-            const querySnapshot = await getDocs(ordersQuery);
-            
-            var html = '';
-            querySnapshot.forEach( async (result) => {
-                switch(result.data().order_status) {
-                    case 10:
-                        status = '<i class="fas fa-lg fa-check text-success"> Entregue</i>';
-                        break;
-                    case 20:
-                        status = '<i class="fas fa-lg fa-truck text-primary"> Entregando</i>';
-                        break;
-                    case 80:
-                        status = '<i class="fas fa-lg fa-undo text-warning"> Retornado</i>';
-                        break;
-                    case 90:
-                        status = '<i class="fas fa-lg fa-times text-danger"> Cancelado</i>';
-                        break;
-                }
-         
-                const storeRef =  doc(db, "stores", result.data().store.id); 
-                const storeSnap = await getDoc(storeRef);
-                var store = storeSnap.data().store_name;
-
-                var dateFormat = new Date(result.data().order_date.toDate())
-
-                var date = dateFormat.getDate()+
-                    "/"+(dateFormat.getMonth()+1)+
-                    "/"+dateFormat.getFullYear()+
-                    " "+dateFormat.getHours()+
-                    ":"+dateFormat.getMinutes();
-
-
-                html += '<div class="row text-dark order-bg list-group-item d-flex justify-content-between align-items-center p-3">';
-                    html += '<div class="col-md-2"><b>'+result.data().order_number+'</b></div>';
-                    html += '<div class="col-md-2"><b>'+date+'</b></div>';
-                    html += '<div class="col-md-4"><b>'+store+'</b></div>';
-                    html += '<div class="col-md-2"><b>R$ '+result.data().order_amount+'</b></div>';
-                    html += '<div class="col-md-2">'+status+'</div>';
-                html += '</div>';
-
-                $("#orders").append(html);
-                html = '';
-            });
-            
-        }
-    });
-</script>
-
     <section>
         <div class="container py-5">
             <div class="row">
                 <div class="col-md-12">
                     <div class="card mb-4 mb-md-0">
                         <div class="card-body">
-                            <p class="mb-4"><span class="text-primary font-italic me-1">Últimos Pedidos</span></p>
+                            <p class="mb-4"><span class="text-primary font-italic me-1">Lojas</span></p>
                             <div class="card-body p-0">
-                                <div class="row bg-gradient-primary text-white">
-                                    <div class="col-md-2">Número</div>
-                                    <div class="col-md-2">Data</div>
-                                    <div class="col-md-4">Loja</div>
-                                    <div class="col-md-2">Valor</div>
-                                    <div class="col-md-2">Status</div>
+                                <div class="row rounded-3" id="stores">
+                                    
                                 </div>
-                                <ul class="list-group list-group-flush rounded-3" id="orders"></ul>
                             </div>
                         </div>
                     </div>

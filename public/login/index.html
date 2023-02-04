@@ -42,6 +42,8 @@
             if(email!="" && password!=""){
                 signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
+                    const user = userCredential.user;
+                    setCookie('uid',user.uid);
                     window.location = "../Home.html";
                 })
                 .catch((error) => {
@@ -69,8 +71,9 @@
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 const token = credential.accessToken;
                 // The signed-in user info.
-                const user = JSON.stringify(result.user);
-                
+                const user = result.user;
+                setCookie('uid',user.uid);
+                    
                 window.location = "../Home.html";
             }).catch((error) => {
                 // Handle Errors here.
@@ -92,8 +95,9 @@
             signInWithPopup(auth, provider)
             .then((result) => {
                 // The signed-in user info.
-                const user = JSON.stringify(result.user);
-
+                const user = result.user;
+                
+                setCookie('uid',user.uid);
                 // This gives you a Facebook Access Token. You can use it to access the Facebook API.
                 const credential = FacebookAuthProvider.credentialFromResult(result);
                 const accessToken = credential.accessToken;     

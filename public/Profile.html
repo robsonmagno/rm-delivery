@@ -9,8 +9,6 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-
-
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
@@ -32,7 +30,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, setDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
+        import { getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
         
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -40,12 +38,15 @@
         // Initialize Firebase Authentication and get a reference to the service
         const auth = getAuth(app);
     
-        onAuthStateChanged(auth, (user) => {
+        var uid = getCookie('uid');
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in, see docs for a list of available properties
                 // https://firebase.google.com/docs/reference/js/firebase.User
-                const uid = user.uid;
-    
+                uid = user.uid;
+                //setCookie('uid',uid);
+
                 user.providerData.forEach((profile) => {
     
                     if(!profile.photoURL){
@@ -57,8 +58,230 @@
                     
                     $(".user_name").html(profile.displayName);
                 });
+
                 
             }
+        });
+
+        // Initialize Cloud Firestore and get a reference to the service
+        const db = getFirestore(app);
+
+        const userRef =   doc(db, "users", uid); 
+        const docSnap = await getDoc(userRef);
+//
+//const usersRef = collection(db, "users",uid);
+//
+//const stateQuery = query(usersRef, where("uid", "==", uid));
+//
+//const querySnapshot = await getDocs(stateQuery);
+//
+//querySnapshot.forEach((doc) => {
+//    if(uid!="") {
+        var user_email              = docSnap.data().user_email;
+        var user_name               = docSnap.data().user_name;
+        var user_phone              = docSnap.data().user_phone;
+        var user_address            = docSnap.data().user_address;
+        var user_address_number     = docSnap.data().user_address_number;
+        var user_address_district   = docSnap.data().user_address_district;
+        var user_address_city       = docSnap.data().user_address_city;
+        var user_address_zip        = docSnap.data().user_address_zip;
+        var user_address_state      = docSnap.data().user_address_state;
+        
+        if(user_address=="") user_address = "&nbsp;";
+        if(user_address_number=="") user_address_number = "&nbsp;";
+        if(user_address_district=="") user_address_district = "&nbsp;";
+        if(user_address_city=="") user_address_city = "&nbsp;";
+        if(user_address_zip=="") user_address_zip = "&nbsp;";
+        if(user_address_state=="") user_address_state = "&nbsp;";
+
+        $("#user_email").html(user_email);
+        $(".user_name").html(user_name);
+        $(".user_nameF").html(user_name);
+        $(".user_phone").html(user_phone);
+        $(".user_addressF").html(user_address);
+        $(".user_address_numberF").html(user_address_number);
+        $(".user_address_districtF").html(user_address_district);
+        $(".user_address_cityF").html(user_address_city);
+        $(".user_address_zipF").html(user_address_zip);
+        $(".user_address_stateF").html(user_address_state);
+
+        $(".user_address").html(user_address + ", " + user_address_number + " " +user_address_district + "<br/>");
+        $(".user_address").append(user_address_city + " " + user_address_state + " - " +user_address_zip);
+
+        //$("#user_name").val(user_name);
+        
+        //$("#user_phone").val(user_phone);
+        
+        //$("#user_address").val(user_address);
+    //}            
+//});
+getLocation();
+
+        
+
+        $("#edit").click(function(){
+            $(".user_nameF").hide();
+            $("#user_name").show();
+            $("#user_name").val($(".user_nameF").html());
+
+            $(".user_phone").hide();
+            $("#user_phone").show();
+            $("#user_phone").val($(".user_phone").html());
+
+            $(".user_addressF").hide();
+            $("#user_address").show();
+            $("#user_address").val($(".user_addressF").html());
+
+            $(".user_address_numberF").hide();
+            $("#user_address_number").show();
+            $("#user_address_number").val($(".user_address_numberF").html());
+
+            $(".user_address_districtF").hide();
+            $("#user_address_district").show();
+            $("#user_address_district").val($(".user_address_districtF").html());
+
+            $(".user_address_cityF").hide();
+            $("#user_address_city").show();
+            $("#user_address_city").val($(".user_address_cityF").html());
+
+            $(".user_address_zipF").hide();
+            $("#user_address_zip").show();
+            $("#user_address_zip").val($(".user_address_zipF").html());
+
+            $(".user_address_stateF").hide();
+            $("#user_address_state").show();
+            $("#user_address_state").val($(".user_address_stateF").html());
+
+            $("#edit").hide();
+            $("#profileSave").show();
+            $("#profileCancel").show();
+        });
+
+        $("#profileCancel").click(function() {
+            window.location = "Profile.html";
+        });
+
+        
+
+        $("#user_name").focus(function(){
+            $("#user_name").removeClass('border border-danger');
+        });
+        $("#user_address").focus(function(){
+            $("#user_address").removeClass('border border-danger');
+        });
+        $("#user_phone").focus(function(){
+            $("#user_phone").removeClass('border border-danger');
+        });
+        $("#user_address_number").focus(function(){
+            $("#user_address_number").removeClass('border border-danger');
+        });
+        $("#user_address_district").focus(function(){
+            $("#user_address_district").removeClass('border border-danger');
+        });
+
+        $("#user_address_city").focus(function(){
+            $("#user_address_city").removeClass('border border-danger');
+        });
+        $("#user_address_zip").focus(function(){
+            $("#user_address_zip").removeClass('border border-danger');
+        });
+        $("#user_address_state").focus(function(){
+            $("#user_address_state").removeClass('border border-danger');
+        });
+
+        $("#profileSave").click( async function(){
+            var valid = true;
+            
+            var user_name                = $("#user_name").val();
+            var user_phone               = $("#user_phone").val();
+            var user_address             = $("#user_address").val();
+            var user_address_number      = $("#user_address_number").val();
+            var user_address_district    = $("#user_address_district").val();
+            var user_address_city        = $("#user_address_city").val();
+            var user_address_zip         = $("#user_address_zip").val();
+            var user_address_state       = $("#user_address_state").val();
+            
+            var user_email = $("#user_email").html();
+
+            if(user_name=="") { valid = false; $("#user_name").addClass('border border-danger'); }
+            if(user_phone=="") { valid = false; $("#user_phone").addClass('border border-danger'); }
+            if(user_address=="") { valid = false; $("#user_address").addClass('border border-danger'); }
+            if(user_address_number=="") { valid = false; $("#user_address_number").addClass('border border-danger'); }
+            if(user_address_district=="") { valid = false; $("#user_address_district").addClass('border border-danger'); }
+            if(user_address_city=="") { valid = false; $("#user_address_city").addClass('border border-danger'); }
+            if(user_address_zip=="") { valid = false; $("#user_address_zip").addClass('border border-danger'); }
+            if(user_address_state=="") { valid = false; $("#user_address_state").addClass('border border-danger'); }
+            
+            if(valid){
+                const docData = {
+                    user_name:              user_name,
+                    user_phone:             user_phone,
+                    user_address:           user_address,
+                    user_address_number:    user_address_number,
+                    user_address_district:  user_address_district,
+                    user_address_city:      user_address_city,
+                    user_address_zip:       user_address_zip,
+                    user_address_state:     user_address_state,
+
+                    user_email: user_email
+                };
+
+                //var uid = getCookie('uid');
+                
+                //const db = getFirestore(app);
+                //const docRef = doc(db, "users", uid);
+                
+                setDoc(userRef, docData, { merge:true })
+                .then(userRef => {
+                    $("#user_name").hide();
+                    $(".user_nameF").show();
+                    $(".user_name").html(user_name);
+                    $(".user_nameF").html(user_name);
+
+                    $("#user_phone").hide();
+                    $(".user_phone").show();
+                    $(".user_phone").html(user_phone);
+                    
+                    $("#user_address").hide();
+                    $(".user_addressF").show();
+                    $(".user_address").html(user_address);
+                    $(".user_addressF").html(user_address);
+
+                    $("#user_address_number").hide();
+                    $(".user_address_numberF").show();
+                    $(".user_address_numberF").html(user_address_number);
+
+                    $("#user_address_district").hide();
+                    $(".user_address_districtF").show();
+                    $(".user_address_districtF").html(user_address_district);
+
+                    $("#user_address_city").hide();
+                    $(".user_address_cityF").show();
+                    $(".user_address_cityF").html(user_address_city);
+
+                    $("#user_address_state").hide();
+                    $(".user_address_stateF").show();
+                    $(".user_address_stateF").html(user_address_state);
+
+                    $("#user_address_zip").hide();
+                    $(".user_address_zipF").show();
+                    $(".user_address_zipF").html(user_address_zip);
+
+                    $(".user_address").html(user_address + ", " + user_address_number + " " +user_address_district + "<br/>");
+                    $(".user_address").append(user_address_city + " " + user_address_state + " - " +user_address_zip);
+
+                    $("#edit").show();
+                    $("#profileSave").hide();
+                    $("#profileCancel").hide();
+                    console.log("Document Field has been updated successfully");
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+
+                
+            }
+            
         });
     </script>
     <!-- Page Wrapper -->
@@ -278,52 +501,6 @@
                 <!-- End of Topbar -->
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, setDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-
-        const auth = getAuth();
-        onAuthStateChanged(auth, async (user) =>  {
-            if (user) {
-                // User is signed in, see docs for a list of available properties
-                // https://firebase.google.com/docs/reference/js/firebase.User
-                const uid = user.uid;
-
-                // Initialize Cloud Firestore and get a reference to the service
-                const db = getFirestore(app);
-                const usersRef = collection(db, "users");
-
-                const stateQuery = query(usersRef, where("uid", "==", uid));
-
-                const querySnapshot = await getDocs(stateQuery);
-
-                querySnapshot.forEach((doc) => {
-                    if(uid!="") {
-                        var user_email = doc.data().user_email;
-                        var user_name = doc.data().user_name;
-                        var user_phone = doc.data().user_phone;
-                        var user_address = doc.data().user_address;
-                        
-                        $("#user_name").val(user_name);
-                        $("#user_email").html(user_email);
-                        $("#user_phone").val(user_phone);
-                        $(".user_address").html(user_address);
-                        $("#user_address").val(user_address);
-                    }            
-                });
-            }
-        });
-
-        
-        getLocation();
-        
-    </script>
     
     <section>
         <div class="container py-5">
@@ -350,45 +527,68 @@
                     <div class="card mb-4">
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-sm-3">
+                                <div class="col-sm-12">
                                     <p class="mb-0">Nome</p>
-                                </div>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control form-control-user" id="user_name" name="user_name" placeholder="Nome">
+                                    <span class="user_nameF"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_name" name="user_name" placeholder="Nome">
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
-                                <div class="col-sm-3">
+                                <div class="col-sm-8">
                                     <p class="mb-0">Email</p>
-                                </div>
-                                <div class="col-sm-9">
                                     <p class="text-muted mb-0" id="user_email"></p>
                                 </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-sm-3">
+                                <div class="col-sm-4">
                                     <p class="mb-0">Telefone</p>
-                                </div>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control form-control-user" id="user_phone" name="user_phone" placeholder="Telefone">
+                                    <span class="user_phone"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_phone" name="user_phone" placeholder="Telefone">
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
-                                <div class="col-sm-3">
+                                <div class="col-sm-6">
                                     <p class="mb-0">Endereço</p>
+                                    <span class="user_addressF"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_address" name="user_address" placeholder="Endereço">
                                 </div>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control form-control-user" id="user_address" name="user_address" placeholder="Endereço">
+                                <div class="col-sm-3">
+                                    <p class="mb-0">Número</p>
+                                    <span class="user_address_numberF"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_address_number" name="user_address_number" placeholder="Número">
+                                </div>
+                                <div class="col-sm-3">
+                                    <p class="mb-0">Bairro</p>
+                                    <span class="user_address_districtF"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_address_district" name="user_address_district" placeholder="Bairro">
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
-                                <div class="col-sm-9"></div>
-                                <div class="col-sm-3">
-                                    <input type="button" class="form-control btn btn-primary" id="profileSave" name="profileSave" value="Salvar">
+                                <div class="col-sm-4">
+                                    <p class="mb-0">Cidade</p>
+                                    <span class="user_address_cityF"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_address_city" name="user_address_city" placeholder="Cidade">
+                                </div>
+                                <div class="col-sm-4">
+                                    <p class="mb-0">Estado</p>
+                                    <span class="user_address_stateF"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_address_state" name="user_address_state" placeholder="Estado">
+                                </div>
+                                <div class="col-sm-4">
+                                    <p class="mb-0">CEP</p>
+                                    <span class="user_address_zipF"></span>
+                                    <input type="text" class="form-control form-control-user" style="display: none;" id="user_address_zip" name="user_address_zip" placeholder="CEP">
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-6"></div>
+                                <div class="col-sm-6 text-right">
+                                    <div class="btn btn-default border" id="edit"><i class="fas fa-edit"> Editar</i></div>
+                                    <div class="btn btn-danger" id="profileCancel" style="display: none;"><i class="fas fa-times"> Cancelar</i></div>
+                                    <div class="btn btn-primary" id="profileSave" style="display: none;"><i class="fas fa-save"> Salvar</i></div>
+                                    <!--<input type="button" class="form-control btn btn-primary" style="display: none;" id="profileSave" name="profileSave" value="Salvar">-->
                                 </div>
                             </div>
                         </div>
@@ -549,11 +749,11 @@ aria-hidden="true">
     var x = document.getElementById("geolocationPosition");
 
     function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else { 
-        x.innerHTML = "Geolocation is not supported by this browser.";
-    }
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else { 
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
     }
 
     function showPosition(position) {

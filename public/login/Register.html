@@ -64,7 +64,6 @@
                 .then((userCredential) => {
                     // Signed in 
                     const user = JSON.stringify(userCredential.user);
-                    $("#user").val(user);
 
                     const docData = {
                         user_name: userCredential.user.displayName,
@@ -116,7 +115,6 @@
                 // The signed-in user info.
                 const user = JSON.stringify(result.user);
                 
-                $("#user").val(user);
                 const docData = {
                     user_name: result.user.displayName,
                     user_email: result.user.email,
@@ -157,12 +155,12 @@
             .then((result) => {
                 // The signed-in user info.
                 const user = JSON.stringify(result.user);
-
+                var uid = result.user.uid;
                 // This gives you a Facebook Access Token. You can use it to access the Facebook API.
                 const credential = FacebookAuthProvider.credentialFromResult(result);
                 const accessToken = credential.accessToken;     
                 
-                $("#user").val(user);
+                
 
                 const docData = {
                     user_name: result.user.displayName,
@@ -178,11 +176,13 @@
                 };
         
                 const db = getFirestore(app);
-
+                console.log(uid);
                 // Add a new document with a generated id.
-                const docRef = addDoc(collection(db, "users", result.user.uid), docData).then((ret) => {
+                const docRef = setDoc(doc(db, "users", uid), docData).then((ret) => {
                     window.location = "../Home.html";
                 });
+                
+                return false;
             })
             .catch((error) => {
                 // Handle Errors here.
@@ -214,7 +214,7 @@
                             </div>
                             <div class="text-center alert alert-danger" style="display: none;" id="alert"></div>
                             <form class="user" name="registerForm" id="registerForm" method="post">
-                                <input type="hidden" id="user" name="user" />
+
                                 <div class="form-group">
                                     <input type="text" class="form-control form-control-user" id="user_name" name="user_name"
                                         placeholder="Nome">

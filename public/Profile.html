@@ -25,42 +25,36 @@
 </head>
 
 <body>
-    <script src="includes/firebase.js"></script>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-    
-        // Initialize Firebase Authentication and get a reference to the service
-        const auth = getAuth(app);
-    
-        var uid = getCookie('uid');
+<script src="includes/firebase.js"></script>
+<script type="module">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+import { getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User is signed in, see docs for a list of available properties
-                // https://firebase.google.com/docs/reference/js/firebase.User
-                uid = user.uid;
-                //setCookie('uid',uid);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-                user.providerData.forEach((profile) => {
-    
-                    if(!profile.photoURL){
-                        $(".user_foto").prop("src", "img/userFoto.webp");
-                    }else{
-                        $(".user_foto").prop("src", profile.photoURL);
-                    }                 
-    
-                    
-                    $(".user_name").html(profile.displayName);
-                });
+// Initialize Firebase Authentication and get a reference to the service
+const auth = getAuth(app);
 
-                
-            }
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const uid = user.uid;
+        //setCookie('uid',uid);
+
+        user.providerData.forEach((profile) => {
+
+            if(!profile.photoURL){
+                $(".user_foto").prop("src", "img/userFoto.webp");
+            }else{
+                $(".user_foto").prop("src", profile.photoURL);
+            }                 
+
+            
+            $(".user_name").html(profile.displayName);
         });
 
         // Initialize Cloud Firestore and get a reference to the service
@@ -68,15 +62,9 @@
 
         const userRef =   doc(db, "users", uid); 
         const docSnap = await getDoc(userRef);
-//
-//const usersRef = collection(db, "users",uid);
-//
-//const stateQuery = query(usersRef, where("uid", "==", uid));
-//
-//const querySnapshot = await getDocs(stateQuery);
-//
-//querySnapshot.forEach((doc) => {
-//    if(uid!="") {
+
+        console.log(uid);
+
         var user_email              = docSnap.data().user_email;
         var user_name               = docSnap.data().user_name;
         var user_phone              = docSnap.data().user_phone;
@@ -86,7 +74,7 @@
         var user_address_city       = docSnap.data().user_address_city;
         var user_address_zip        = docSnap.data().user_address_zip;
         var user_address_state      = docSnap.data().user_address_state;
-        
+
         if(user_address=="") user_address = "&nbsp;";
         if(user_address_number=="") user_address_number = "&nbsp;";
         if(user_address_district=="") user_address_district = "&nbsp;";
@@ -106,18 +94,7 @@
         $(".user_address_stateF").html(user_address_state);
 
         $(".user_address").html(user_address + ", " + user_address_number + " " +user_address_district + "<br/>");
-        $(".user_address").append(user_address_city + " " + user_address_state + " - " +user_address_zip);
-
-        //$("#user_name").val(user_name);
-        
-        //$("#user_phone").val(user_phone);
-        
-        //$("#user_address").val(user_address);
-    //}            
-//});
-getLocation();
-
-        
+        $(".user_address").append(user_address_city + " " + user_address_state + " - " +user_address_zip);             
 
         $("#edit").click(function(){
             $(".user_nameF").hide();
@@ -160,8 +137,6 @@ getLocation();
         $("#profileCancel").click(function() {
             window.location = "Profile.html";
         });
-
-        
 
         $("#user_name").focus(function(){
             $("#user_name").removeClass('border border-danger');
@@ -225,11 +200,6 @@ getLocation();
 
                     user_email: user_email
                 };
-
-                //var uid = getCookie('uid');
-                
-                //const db = getFirestore(app);
-                //const docRef = doc(db, "users", uid);
                 
                 setDoc(userRef, docData, { merge:true })
                 .then(userRef => {
@@ -283,7 +253,11 @@ getLocation();
             }
             
         });
-    </script>
+    }else{
+        window.location = "Logout.html";
+    }
+});
+</script>
     <!-- Page Wrapper -->
     <div id="wrapper">
         <!-- Content Wrapper -->

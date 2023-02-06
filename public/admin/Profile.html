@@ -1,0 +1,492 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+
+<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap-switch-button@1.1.0/css/bootstrap-switch-button.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap-switch-button@1.1.0/dist/bootstrap-switch-button.min.js"></script>
+
+<script type="module">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+import { getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase Authentication and get a reference to the service
+const auth = getAuth(app);
+
+var uid = getCookie('uid');
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        uid = user.uid;
+        //setCookie('uid',uid);
+
+        user.providerData.forEach((profile) => {
+
+            if(!profile.photoURL){
+                $(".user_foto").prop("src", "../img/userFoto.webp");
+            }else{
+                $(".user_foto").prop("src", profile.photoURL);
+            }                 
+
+            
+            $(".user_name").html(profile.displayName);
+        });
+
+        // Initialize Cloud Firestore and get a reference to the service
+        const db = getFirestore(app);
+        const companiesRef =   doc(db, "companies", uid); 
+        const companiesSnap = await getDoc(companiesRef);
+
+        var company_email              = companiesSnap.data().company_email;
+        var company_name               = companiesSnap.data().company_name;
+        var company_phone              = companiesSnap.data().company_phone;
+        var company_address            = companiesSnap.data().company_address;
+        var company_address_number     = companiesSnap.data().company_address_number;
+        var company_address_district   = companiesSnap.data().company_address_district;
+        var company_address_city       = companiesSnap.data().company_address_city;
+        var company_address_zip        = companiesSnap.data().company_address_zip;
+        var company_address_state      = companiesSnap.data().company_address_state;
+        
+        if(company_address=="") company_address = "&nbsp;";
+        if(company_address_number=="") company_address_number = "&nbsp;";
+        if(company_address_district=="") company_address_district = "&nbsp;";
+        if(company_address_city=="") company_address_city = "&nbsp;";
+        if(company_address_zip=="") company_address_zip = "&nbsp;";
+        if(company_address_state=="") company_address_state = "&nbsp;";
+
+        $("#company_email").html(company_email);
+        $(".company_name").html(company_name);
+        $(".company_nameF").html(company_name);
+        $(".company_phone").html(company_phone);
+        $(".company_addressF").html(company_address);
+        $(".company_address_numberF").html(company_address_number);
+        $(".company_address_districtF").html(company_address_district);
+        $(".company_address_cityF").html(company_address_city);
+        $(".company_address_zipF").html(company_address_zip);
+        $(".company_address_stateF").html(company_address_state);
+
+        $(".company_address").html(company_address + ", " + company_address_number + " " +company_address_district + "<br/>");
+        $(".company_address").append(company_address_city + " " + company_address_state + " - " +company_address_zip);                
+
+        $("#edit").click(function(){
+            $(".company_nameF").hide();
+            $("#company_name").show();
+            $("#company_name").val($(".company_nameF").html());
+
+            $(".company_phone").hide();
+            $("#company_phone").show();
+            $("#company_phone").val($(".company_phone").html());
+
+            $(".company_addressF").hide();
+            $("#company_address").show();
+            $("#company_address").val($(".company_addressF").html());
+
+            $(".company_address_numberF").hide();
+            $("#company_address_number").show();
+            $("#company_address_number").val($(".company_address_numberF").html());
+
+            $(".company_address_districtF").hide();
+            $("#company_address_district").show();
+            $("#company_address_district").val($(".company_address_districtF").html());
+
+            $(".company_address_cityF").hide();
+            $("#company_address_city").show();
+            $("#company_address_city").val($(".company_address_cityF").html());
+
+            $(".company_address_zipF").hide();
+            $("#company_address_zip").show();
+            $("#company_address_zip").val($(".company_address_zipF").html());
+
+            $(".company_address_stateF").hide();
+            $("#company_address_state").show();
+            $("#company_address_state").val($(".company_address_stateF").html());
+
+            $("#edit").hide();
+            $("#profileSave").show();
+            $("#profileCancel").show();
+        });
+
+        $("#profileCancel").click(function() {
+
+            $("#company_name").hide();
+            $(".company_nameF").show();
+            $(".company_name").html(company_name);
+            $(".company_nameF").html(company_name);
+
+            $("#company_phone").hide();
+            $(".company_phone").show();
+            $(".company_phone").html(company_phone);
+            
+            $("#company_address").hide();
+            $(".company_addressF").show();
+            $(".company_address").html(company_address);
+            $(".company_addressF").html(company_address);
+
+            $("#company_address_number").hide();
+            $(".company_address_numberF").show();
+            $(".company_address_numberF").html(company_address_number);
+
+            $("#company_address_district").hide();
+            $(".company_address_districtF").show();
+            $(".company_address_districtF").html(company_address_district);
+
+            $("#company_address_city").hide();
+            $(".company_address_cityF").show();
+            $(".company_address_cityF").html(company_address_city);
+
+            $("#company_address_state").hide();
+            $(".company_address_stateF").show();
+            $(".company_address_stateF").html(company_address_state);
+
+            $("#company_address_zip").hide();
+            $(".company_address_zipF").show();
+            $(".company_address_zipF").html(company_address_zip);
+
+            $(".company_address").html(company_address + ", " + company_address_number + " " +company_address_district + "<br/>");
+            $(".company_address").append(company_address_city + " " + company_address_state + " - " +company_address_zip);
+
+            $("#edit").show();
+            $("#profileSave").hide();
+            $("#profileCancel").hide();
+        });
+
+        
+
+        $("#company_name").focus(function(){
+            $("#company_name").removeClass('border border-danger');
+        });
+        $("#company_address").focus(function(){
+            $("#company_address").removeClass('border border-danger');
+        });
+        $("#company_phone").focus(function(){
+            $("#company_phone").removeClass('border border-danger');
+        });
+        $("#company_address_number").focus(function(){
+            $("#company_address_number").removeClass('border border-danger');
+        });
+        $("#company_address_district").focus(function(){
+            $("#company_address_district").removeClass('border border-danger');
+        });
+
+        $("#company_address_city").focus(function(){
+            $("#company_address_city").removeClass('border border-danger');
+        });
+        $("#company_address_zip").focus(function(){
+            $("#company_address_zip").removeClass('border border-danger');
+        });
+        $("#company_address_state").focus(function(){
+            $("#company_address_state").removeClass('border border-danger');
+        });
+
+        $("#profileSave").click( async function(){
+            var valid = true;
+            
+            var company_name                = $("#company_name").val();
+            var company_phone               = $("#company_phone").val();
+            var company_address             = $("#company_address").val();
+            var company_address_number      = $("#company_address_number").val();
+            var company_address_district    = $("#company_address_district").val();
+            var company_address_city        = $("#company_address_city").val();
+            var company_address_zip         = $("#company_address_zip").val();
+            var company_address_state       = $("#company_address_state").val();
+            
+            var company_email = $("#company_email").html();
+
+            if(company_name=="") { valid = false; $("#company_name").addClass('border border-danger'); }
+            if(company_phone=="") { valid = false; $("#company_phone").addClass('border border-danger'); }
+            if(company_address=="") { valid = false; $("#company_address").addClass('border border-danger'); }
+            if(company_address_number=="") { valid = false; $("#company_address_number").addClass('border border-danger'); }
+            if(company_address_district=="") { valid = false; $("#company_address_district").addClass('border border-danger'); }
+            if(company_address_city=="") { valid = false; $("#company_address_city").addClass('border border-danger'); }
+            if(company_address_zip=="") { valid = false; $("#company_address_zip").addClass('border border-danger'); }
+            if(company_address_state=="") { valid = false; $("#company_address_state").addClass('border border-danger'); }
+            
+            if(valid){
+                const docData = {
+                    company_name:              company_name,
+                    company_phone:             company_phone,
+                    company_address:           company_address,
+                    company_address_number:    company_address_number,
+                    company_address_district:  company_address_district,
+                    company_address_city:      company_address_city,
+                    company_address_zip:       company_address_zip,
+                    company_address_state:     company_address_state,
+
+                    company_email: company_email
+                };
+
+                //var uid = getCookie('uid');
+                
+                //const db = getFirestore(app);
+                //const docRef = doc(db, "users", uid);
+                
+                setDoc(companiesRef, docData, { merge:true })
+                .then(userRef => {
+                    $("#company_name").hide();
+                    $(".company_nameF").show();
+                    $(".company_name").html(company_name);
+                    $(".company_nameF").html(company_name);
+
+                    $("#company_phone").hide();
+                    $(".company_phone").show();
+                    $(".company_phone").html(company_phone);
+                    
+                    $("#company_address").hide();
+                    $(".company_addressF").show();
+                    $(".company_address").html(company_address);
+                    $(".company_addressF").html(company_address);
+
+                    $("#company_address_number").hide();
+                    $(".company_address_numberF").show();
+                    $(".company_address_numberF").html(company_address_number);
+
+                    $("#company_address_district").hide();
+                    $(".company_address_districtF").show();
+                    $(".company_address_districtF").html(company_address_district);
+
+                    $("#company_address_city").hide();
+                    $(".company_address_cityF").show();
+                    $(".company_address_cityF").html(company_address_city);
+
+                    $("#company_address_state").hide();
+                    $(".company_address_stateF").show();
+                    $(".company_address_stateF").html(company_address_state);
+
+                    $("#company_address_zip").hide();
+                    $(".company_address_zipF").show();
+                    $(".company_address_zipF").html(company_address_zip);
+
+                    $(".company_address").html(company_address + ", " + company_address_number + " " +company_address_district + "<br/>");
+                    $(".company_address").append(company_address_city + " " + company_address_state + " - " +company_address_zip);
+
+                    $("#edit").show();
+                    $("#profileSave").hide();
+                    $("#profileCancel").hide();
+                    console.log("Document Field has been updated successfully");
+                })
+                .catch(error => {
+                    console.log(error);
+                })            
+            }        
+        });
+
+        getLocation();
+    }else{
+        window.location = "Logout.html";
+    }
+});
+
+    
+    
+</script>
+<section>
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <img id="user_foto" alt="avatar" class="rounded-circle img-fluid user_foto" style="width: 150px;">
+                        <h5 class="my-3 company_name"></h5>
+                        <!--<p class="text-muted mb-1">Full Stack Developer</p>-->
+                        <p class="text-muted mb-4 company_address"></p>
+                        <div class="d-flex justify-content-center mb-2">
+                            <button type="button" class="btn btn-outline-primary ms-1">Mensagem</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4 mb-lg-0">
+                    <div class="card-body p-0">
+                        <div id="geolocationMap" style="width: 100%; height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <p class="mb-0">Nome</p>
+                                <span class="company_nameF"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_name" name="company_name" placeholder="Nome">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <p class="mb-0">Email</p>
+                                <p class="text-muted mb-0" id="company_email"></p>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="mb-0">Telefone</p>
+                                <span class="company_phone"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_phone" name="company_phone" placeholder="Telefone">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <p class="mb-0">Endereço</p>
+                                <span class="company_addressF"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_address" name="company_address" placeholder="Endereço">
+                            </div>
+                            <div class="col-sm-3">
+                                <p class="mb-0">Número</p>
+                                <span class="company_address_numberF"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_address_number" name="company_address_number" placeholder="Número">
+                            </div>
+                            <div class="col-sm-3">
+                                <p class="mb-0">Bairro</p>
+                                <span class="company_address_districtF"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_address_district" name="company_address_district" placeholder="Bairro">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <p class="mb-0">Cidade</p>
+                                <span class="company_address_cityF"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_address_city" name="company_address_city" placeholder="Cidade">
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="mb-0">Estado</p>
+                                <span class="company_address_stateF"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_address_state" name="company_address_state" placeholder="Estado">
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="mb-0">CEP</p>
+                                <span class="company_address_zipF"></span>
+                                <input type="text" class="form-control form-control-user" style="display: none;" id="company_address_zip" name="company_address_zip" placeholder="CEP">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-6"></div>
+                            <div class="col-sm-6 text-right">
+                                <div class="btn btn-default border" id="edit"><i class="fas fa-edit"> Editar</i></div>
+                                <div class="btn btn-danger" id="profileCancel" style="display: none;"><i class="fas fa-times"> Cancelar</i></div>
+                                <div class="btn btn-primary" id="profileSave" style="display: none;"><i class="fas fa-save"> Salvar</i></div>
+                                <!--<input type="button" class="form-control btn btn-primary" style="display: none;" id="profileSave" name="profileSave" value="Salvar">-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-4 mb-md-0">
+                            <div class="card-body">
+                                <div class="card-body p-0">
+                                    <div class="my-4">
+                                        <h5 class="mb-0">Notificações</h5>
+                                        <p>Selecione as notificações que deseja receber</p>
+                                        <hr class="my-4" />
+                                        <strong class="mb-0">Pedidos</strong>
+                                        <p>Atualização do Pedido</p>
+                                        <div class="list-group mb-5 shadow">
+                                            <div class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col">
+                                                        <strong class="mb-0">Notificação</strong>
+                                                        <p class="text-muted mb-0">Receber Notificações quando seu pedido mudar de status</p>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col">
+                                                        <strong class="mb-0">Email</strong>
+                                                        <p class="text-muted mb-0">Receber emails quando seu pedido mudar de status</p>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col">
+                                                        <strong class="mb-0">Mensagens</strong>
+                                                        <p class="text-muted mb-0">Receber mensagem quando seu pedido mudar de status</p>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="my-4" />
+                                        <strong class="mb-0">Informações</strong>
+                                        <p>Selecione onde quer receber informações sobre promoções, descontos e atualizações</p>
+                                        <div class="list-group mb-5 shadow">
+                                            <div class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col">
+                                                        <strong class="mb-0">Notificação</strong>
+                                                        <p class="text-muted mb-0">Receber Notificações sobre promoções, descontos e atualizações</p>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col">
+                                                        <strong class="mb-0">Email</strong>
+                                                        <p class="text-muted mb-0">Receber emails sobre promoções, descontos e atualizações</p>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col">
+                                                        <strong class="mb-0">Mensagem</strong>
+                                                        <p class="text-muted mb-0">Receber mensagens sobre promoções, descontos e atualizações</p>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    var x = document.getElementById("geolocationPosition");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else { 
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    function showPosition(position) {
+        const map = L.map('geolocationMap').setView([position.coords.latitude, position.coords.longitude], 13);
+
+        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        const marker = L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
+    }
+</script>

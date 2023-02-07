@@ -1,213 +1,221 @@
 <script type="module">
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
-import { getFirestore, collection, doc, addDoc, getDoc, setDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Authentication and get a reference to the service
-const auth = getAuth(app);
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        const uid = user.uid;
-
-        user.providerData.forEach((profile) => {
-
-            if(!profile.photoURL){
-                $(".user_foto").prop("src", "img/userFoto.webp");
-            }else{
-                $(".user_foto").prop("src", profile.photoURL);
-            }                 
-
-            
-            $(".user_name").html(profile.displayName);
-        });
-
-        // Initialize Cloud Firestore and get a reference to the service
-        const db = getFirestore(app);
-        const companiesRef =   doc(db, "companies", uid); 
-        
-        const ordersRef = collection(db, "orders");
-        const ordersQuery = query(ordersRef, where("order_status", "==", 20), where("company", "==", companiesRef));            
-        const ordersSnapshot = await getDocs(ordersQuery);
-
-        var html = '';
-        ordersSnapshot.forEach( async (result) => {
-            switch(result.data().order_status) {
-                case 1:
-                    status = '<i class="fas fa-lg fa-bells text-success"> Novo</i>';
-                    break;
-                case 10:
-                    status = '<i class="fas fa-lg fa-check text-success"> Entregue</i>';
-                    break;
-                case 20:
-                    status = '<i class="fas fa-lg fa-truck text-primary"> Entregando</i>';
-                    break;
-                case 80:
-                    status = '<i class="fas fa-lg fa-undo text-warning"> Retornado</i>';
-                    break;
-                case 90:
-                    status = '<i class="fas fa-lg fa-times text-danger"> Cancelado</i>';
-                    break;
-            }
-        
-            const storeRef =  doc(db, "stores", result.data().store.id); 
-            const storeSnap = await getDoc(storeRef);
-            var store = storeSnap.data().store_name;
-
-            var dateFormat = new Date(result.data().order_date.toDate())
-
-            var date = dateFormat.getDate()+
-                "/"+(dateFormat.getMonth()+1)+
-                "/"+dateFormat.getFullYear()+
-                " "+dateFormat.getHours()+
-                ":"+dateFormat.getMinutes();
-
-
-            html += '<tr id="'+result.id+'" class="rowData">';
-                html += '<th class="col-md-2 text-center">'+result.data().order_number+'</th>';
-                html += '<td class="col-md-2 text-center"">'+date+'</td>';
-                html += '<td class="col-md-4">'+store+'</td>';
-                html += '<td class="col-md-2 text-right">R$ '+result.data().order_amount+'</td>';
-                html += '<td class="col-md-2">'+status+'</td>';
-            html += '</tr>';
-
-            $("#orders").append(html);
-            html = '';
-        });
-        
-        $(".rowData").click( async function(){
-            var id = $(this).attr('id');
-alert(0);
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider  } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+    import { getFirestore, collection, doc, addDoc, getDoc, setDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js"; 
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    
+    // Initialize Firebase Authentication and get a reference to the service
+    const auth = getAuth(app);
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+            const uid = user.uid;
+    
+            user.providerData.forEach((profile) => {
+    
+                if(!profile.photoURL){
+                    $(".user_foto").prop("src", "img/userFoto.webp");
+                }else{
+                    $(".user_foto").prop("src", profile.photoURL);
+                }                 
+    
+                
+                $(".user_name").html(profile.displayName);
+            });
+    
             // Initialize Cloud Firestore and get a reference to the service
             const db = getFirestore(app);
-            const orderRef =   doc(db, "orders", id); 
-            const docSnap = await getDoc(orderRef);
+            const companiesRef =   doc(db, "companies", uid); 
 
-            switch(docSnap.data().order_status) {
-                case 10:
-                    var order_status = '<i class="fas fa-lg fa-check text-success"> Entregue</i>';
-                    break;
-                case 20:
-                    var order_status = '<i class="fas fa-lg fa-truck text-primary"> Entregando</i>';
-                    break;
-                case 80:
-                    var order_status = '<i class="fas fa-lg fa-undo text-warning"> Retornado</i>';
-                    break;
-                case 90:
-                    var order_status = '<i class="fas fa-lg fa-times text-danger"> Cancelado</i>';
-                    break;
-            }
-
-            var dateFormat = new Date(docSnap.data().order_date.toDate())
-
-            var order_date = dateFormat.getDate()+
-                        "/"+(dateFormat.getMonth()+1)+
-                        "/"+dateFormat.getFullYear()+
-                        " "+dateFormat.getHours()+
-                        ":"+dateFormat.getMinutes();
-
-            const storeRef =  doc(db, "stores", docSnap.data().store.id); 
-            const storeSnap = await getDoc(storeRef);
-            var order_store = storeSnap.data().store_name;
-
-            const userRef =  doc(db, "users", docSnap.data().uid.id); 
-            const userSnap = await getDoc(userRef);
-            var order_user = userSnap.data().user_name;
-            var order_user_address            = userSnap.data().user_address;
-            var order_user_address_number     = userSnap.data().user_address_number;
-            var order_user_address_district   = userSnap.data().user_address_district;
-            var order_user_address_city       = userSnap.data().user_address_city;
-            var order_user_address_zip        = userSnap.data().user_address_zip;
-            var order_user_address_state      = userSnap.data().user_address_state;
-
-            var order_number = ("00000000"+docSnap.data().order_number).slice(-8);
-
-            $("#order_date").html(order_date);
-            $("#order_number").html(order_number);
-            $("#order_status").html(order_status);
-
-            $("#order_store").html(order_store);
-            $("#order_user").html(order_user);
+            const storesRef = collection(db, "stores");
+            const storesQuery = query(storesRef, where("company", "==", companiesRef));            
+            const storesSnapshot = await getDocs(storesQuery);
+            const storeArray = [];
+            storesSnapshot.forEach( async (result) => {
+                storeArray[result.id] = result.data().store_name;
+            });
             
-            $("#order_user_address").html(order_user_address);
-            $("#order_user_address_number").html(order_user_address_number);
-            $("#order_user_address_district").html(order_user_address_district);
-            $("#order_user_address_city").html(order_user_address_city);
-            $("#order_user_address_zip").html(order_user_address_zip);
-            $("#order_user_address_state").html(order_user_address_state);
-
-            const ordersProductsRef = collection(db, "orders_products");            
-            const ordersProductsQuery = query(ordersProductsRef, where("order", "==", orderRef));
-            const querySnapshot = await getDocs(ordersProductsQuery);
-            
-            var html = '';
-            var order_product_amount = 0;
-
-            querySnapshot.forEach( async (result) => {
-                const productRef =   doc(db, "products", result.data().product.id); 
-                const productSnap = await getDoc(productRef);
-
-                var product_name             = productSnap.data().product_name;
-                var product_product_quantity = result.data().order_product_quantity;
-                var product_value            = productSnap.data().product_value;
-                var product_amount           = product_product_quantity*productSnap.data().product_value;
-
-                order_product_amount = order_product_amount + product_amount;
-
-                html += '<tr>';
-                    html += '<th class="text-left">'+product_name+'</th>';
-                    html += '<td>'+product_product_quantity+'</td>';
-                    html += '<td class="text-right">R$ '+product_value+'</td>';
-                    html += '<td class="text-right">R$ '+product_amount+'</td>';
-                html += '</tr>';
-
-                $("#order_products").append(html);
-                $("#order_product_amount").html("R$ "+order_product_amount);
-                html = '';
-            })
-
-            $("#order_freight").html("R$ "+docSnap.data().order_freight);
-            $("#order_amount").html("R$ "+docSnap.data().order_amount);
-            
-
-            $("#orderModal").modal({backdrop: false})                   
-        });
-    }else{
-        window.location = "Logout.html";
-    }    
-});
-
+            const ordersRef = collection(db, "orders");
+            const ordersQuery = query(ordersRef, where("order_status", "==", 20), where("company", "==", companiesRef));            
+            const ordersSnapshot = await getDocs(ordersQuery);
     
-</script>
-
-<section>
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card mb-4 mb-md-0">
-                            <div class="card-body">
-                                <p class="mb-4"><span class="text-primary font-italic me-1"><i class="fas fa-fw fa-route"></i> Pedidos Em Rota</span></p>
-                                <div class="card-body p-0">
-                                    <table class="table table-striped table-info rounded-3">
-                                        <thead>
-                                            <tr class="bg-primary text-white">
-                                                <th scope="col" class="col-md-2">Número</th>
-                                                <th scope="col" class="col-md-2">Data</th>
-                                                <th scope="col" class="col-md-4">Loja</th>
-                                                <th scope="col" class="col-md-2">Valor</th>
-                                                <th scope="col" class="col-md-2">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="orders"></tbody>
-                                    </table>
+            var html = '';
+            ordersSnapshot.forEach( async (result) => {
+                
+                switch(result.data().order_status) {
+                    case 1:
+                        status = '<i class="fas fa-lg fa-bells text-success"> Novo</i>';
+                        break;
+                    case 10:
+                        status = '<i class="fas fa-lg fa-check text-success"> Entregue</i>';
+                        break;
+                    case 20:
+                        status = '<i class="fas fa-lg fa-truck text-primary"> Entregando</i>';
+                        break;
+                    case 80:
+                        status = '<i class="fas fa-lg fa-undo text-warning"> Retornado</i>';
+                        break;
+                    case 90:
+                        status = '<i class="fas fa-lg fa-times text-danger"> Cancelado</i>';
+                        break;
+                }
+                            
+                var store = storeArray[result.data().store.id];
+                
+                var dateFormat = new Date(result.data().order_date.toDate());    
+                var date = dateFormat.getDate()+
+                    "/"+(dateFormat.getMonth()+1)+
+                    "/"+dateFormat.getFullYear()+
+                    " "+dateFormat.getHours()+
+                    ":"+dateFormat.getMinutes();
+    
+                   
+                html += '<tr id="'+result.id+'" class="rowData">';
+                    html += '<th class="col-md-2 text-center">'+result.data().order_number+'</th>';
+                    html += '<td class="col-md-2 text-center">'+date+'</td>';
+                    html += '<td class="col-md-4">'+store+'</td>';                    
+                    html += '<td class="col-md-2 text-right">R$ '+result.data().order_amount+'</td>';
+                    html += '<td class="col-md-2">'+status+'</td>';
+                html += '</tr>';
+    
+                $("#orders").append(html);
+                html = '';
+            });
+            
+            $(".rowData").click( async function(){
+                var id = $(this).attr('id');
+    
+                // Initialize Cloud Firestore and get a reference to the service
+                const db = getFirestore(app);
+                const orderRef =   doc(db, "orders", id); 
+                const docSnap = await getDoc(orderRef);
+    
+                switch(docSnap.data().order_status) {
+                    case 10:
+                        var order_status = '<i class="fas fa-lg fa-check text-success"> Entregue</i>';
+                        break;
+                    case 20:
+                        var order_status = '<i class="fas fa-lg fa-truck text-primary"> Entregando</i>';
+                        break;
+                    case 80:
+                        var order_status = '<i class="fas fa-lg fa-undo text-warning"> Retornado</i>';
+                        break;
+                    case 90:
+                        var order_status = '<i class="fas fa-lg fa-times text-danger"> Cancelado</i>';
+                        break;
+                }
+    
+                var dateFormat = new Date(docSnap.data().order_date.toDate())
+    
+                var order_date = dateFormat.getDate()+
+                            "/"+(dateFormat.getMonth()+1)+
+                            "/"+dateFormat.getFullYear()+
+                            " "+dateFormat.getHours()+
+                            ":"+dateFormat.getMinutes();
+    
+                const storeRef =  doc(db, "stores", docSnap.data().store.id); 
+                const storeSnap = await getDoc(storeRef);
+                var order_store = storeSnap.data().store_name;
+    
+                const userRef =  doc(db, "users", docSnap.data().uid.id); 
+                const userSnap = await getDoc(userRef);
+                var order_user = userSnap.data().user_name;
+                var order_user_address            = userSnap.data().user_address;
+                var order_user_address_number     = userSnap.data().user_address_number;
+                var order_user_address_district   = userSnap.data().user_address_district;
+                var order_user_address_city       = userSnap.data().user_address_city;
+                var order_user_address_zip        = userSnap.data().user_address_zip;
+                var order_user_address_state      = userSnap.data().user_address_state;
+    
+                var order_number = ("00000000"+docSnap.data().order_number).slice(-8);
+    
+                $("#order_date").html(order_date);
+                $("#order_number").html(order_number);
+                $("#order_status").html(order_status);
+    
+                $("#order_store").html(order_store);
+                $("#order_user").html(order_user);
+                
+                $("#order_user_address").html(order_user_address);
+                $("#order_user_address_number").html(order_user_address_number);
+                $("#order_user_address_district").html(order_user_address_district);
+                $("#order_user_address_city").html(order_user_address_city);
+                $("#order_user_address_zip").html(order_user_address_zip);
+                $("#order_user_address_state").html(order_user_address_state);
+    
+                const ordersProductsRef = collection(db, "orders_products");            
+                const ordersProductsQuery = query(ordersProductsRef, where("order", "==", orderRef));
+                const querySnapshot = await getDocs(ordersProductsQuery);
+                
+                var html = '';
+                $("#order_products").html('');
+                var order_product_amount = 0;
+    
+                querySnapshot.forEach( async (result) => {
+                    const productRef =   doc(db, "products", result.data().product.id); 
+                    const productSnap = await getDoc(productRef);
+    
+                    var product_name             = productSnap.data().product_name;
+                    var product_product_quantity = result.data().order_product_quantity;
+                    var product_value            = productSnap.data().product_value;
+                    var product_amount           = product_product_quantity*productSnap.data().product_value;
+    
+                    order_product_amount = order_product_amount + product_amount;
+    
+                    html += '<tr>';
+                        html += '<th class="text-left">'+product_name+'</th>';
+                        html += '<td>'+product_product_quantity+'</td>';
+                        html += '<td class="text-right">R$ '+product_value+'</td>';
+                        html += '<td class="text-right">R$ '+product_amount+'</td>';
+                    html += '</tr>';
+    
+                    $("#order_products").append(html);
+                    $("#order_product_amount").html("R$ "+order_product_amount);
+                    html = '';
+                })
+    
+                $("#order_freight").html("R$ "+docSnap.data().order_freight);
+                $("#order_amount").html("R$ "+docSnap.data().order_amount);
+                
+    
+                $("#orderModal").modal({backdrop: false})                   
+            });
+        }else{
+            window.location = "Logout.html";
+        }    
+    });
+    
+        
+    </script>
+    
+    <section>
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-4 mb-md-0">
+                                <div class="card-body">
+                                    <p class="mb-4"><span class="text-primary font-italic me-1"><i class="fas fa-fw fa-route"></i> Pedidos Em Rota</span></p>
+                                    <div class="card-body p-0">
+                                        <table class="table table-striped table-info rounded-3">
+                                            <thead>
+                                                <tr class="bg-primary text-white">
+                                                    <th scope="col" class="col-md-2">Número</th>
+                                                    <th scope="col" class="col-md-2">Data</th>
+                                                    <th scope="col" class="col-md-4">Loja</th>
+                                                    <th scope="col" class="col-md-2">Valor</th>
+                                                    <th scope="col" class="col-md-2">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="orders"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -215,111 +223,110 @@ alert(0);
                 </div>
             </div>
         </div>
-    </div>
-</section>    
-
-<div class="modal fade bd-example-modal-lg" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Pedido <span id="order_number"></span></h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <p class="mb-0">Data</p>
-                        <span id="order_date"></span>
-                    </div>
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-3">
-                        <p class="mb-0">Status</p>
-                        <span id="order_status"></span>
-                    </div>
+    </section>    
+    
+    <div class="modal fade bd-example-modal-lg" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Pedido <span id="order_number"></span></h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
                 </div>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <p class="mb-0">Fornecedor</p>
-                        <span id="order_store"></span>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <p class="mb-0">Data</p>
+                            <span id="order_date"></span>
+                        </div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3">
+                            <p class="mb-0">Status</p>
+                            <span id="order_status"></span>
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <p class="mb-0">Cliente</p>
-                        <span id="order_user"></span>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <p class="mb-0">Fornecedor</p>
+                            <span id="order_store"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0">Cliente</p>
+                            <span id="order_user"></span>
+                        </div>
                     </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <p class="mb-0">Endereço</p>
-                        <span id="order_user_address"></span>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <p class="mb-0">Endereço</p>
+                            <span id="order_user_address"></span>
+                        </div>
+                        <div class="col-sm-3">
+                            <p class="mb-0">Número</p>
+                            <span id="order_user_address_number"></span>
+                        </div>
+                        <div class="col-sm-3">
+                            <p class="mb-0">Bairro</p>
+                            <span id="order_user_address_district"></span>
+                        </div>
                     </div>
-                    <div class="col-sm-3">
-                        <p class="mb-0">Número</p>
-                        <span id="order_user_address_number"></span>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <p class="mb-0">Cidade</p>
+                            <span id="order_user_address_city"></span>
+                        </div>
+                        <div class="col-sm-3">
+                            <p class="mb-0">Estado</p>
+                            <span id="order_user_address_state"></span>
+                        </div>
+                        <div class="col-sm-3">
+                            <p class="mb-0">CEP</p>
+                            <span id="order_user_address_zip"></span>
+                        </div>
                     </div>
-                    <div class="col-sm-3">
-                        <p class="mb-0">Bairro</p>
-                        <span id="order_user_address_district"></span>
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <p class="mb-0">Cidade</p>
-                        <span id="order_user_address_city"></span>
-                    </div>
-                    <div class="col-sm-3">
-                        <p class="mb-0">Estado</p>
-                        <span id="order_user_address_state"></span>
-                    </div>
-                    <div class="col-sm-3">
-                        <p class="mb-0">CEP</p>
-                        <span id="order_user_address_zip"></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card mb-4 mb-md-0">
-                            <div class="card-body text-center">
-                                <h5>Produtos</h5>
-                                <table class="table table-striped table-info">
-                                    <thead>
-                                      <tr class="bg-primary text-white">
-                                        <th scope="col" class="col-md-6">Produto</th>
-                                        <th scope="col" class="col-md-2">Qtd.</th>
-                                        <th scope="col" class="col-md-2">Valor</th>
-                                        <th scope="col" class="col-md-2">Valor Total</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody id="order_products"></tbody>
-                                  </table>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-4 mb-md-0">
+                                <div class="card-body text-center">
+                                    <h5>Produtos</h5>
+                                    <table class="table table-striped table-info">
+                                        <thead>
+                                          <tr class="bg-primary text-white">
+                                            <th scope="col" class="col-md-6">Produto</th>
+                                            <th scope="col" class="col-md-2">Qtd.</th>
+                                            <th scope="col" class="col-md-2">Valor</th>
+                                            <th scope="col" class="col-md-2">Valor Total</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody id="order_products"></tbody>
+                                      </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-2"></div>
-                    <div class="col-sm-4 text-center">
-                        <p class="mb-0">Valor Produtos</p>
-                        <span id="order_product_amount"></span>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-4 text-center">
+                            <p class="mb-0">Valor Produtos</p>
+                            <span id="order_product_amount"></span>
+                        </div>
+                        <div class="col-sm-3 text-center">
+                            <p class="mb-0">Frete</p>
+                            <span id="order_freight"></span>
+                        </div>
+                        <div class="col-sm-3 text-center">
+                            <p class="mb-0">Valor Total</p>
+                            <span id="order_amount"></span>
+                        </div>
                     </div>
-                    <div class="col-sm-3 text-center">
-                        <p class="mb-0">Frete</p>
-                        <span id="order_freight"></span>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Fechar</button>
                     </div>
-                    <div class="col-sm-3 text-center">
-                        <p class="mb-0">Valor Total</p>
-                        <span id="order_amount"></span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
     </div>
-</div>

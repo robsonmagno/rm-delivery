@@ -33,6 +33,14 @@ onAuthStateChanged(auth, async (user) => {
         const db = getFirestore(app);
         const companiesRef =   doc(db, "companies", uid); 
         
+        const storesRef = collection(db, "stores");
+        const storesQuery = query(storesRef, where("company", "==", companiesRef));            
+        const storesSnapshot = await getDocs(storesQuery);
+        const storeArray = [];
+        storesSnapshot.forEach( async (result) => {
+            storeArray[result.id] = result.data().store_name;
+        });
+
         const ordersRef = collection(db, "orders");
         const ordersQuery = query(ordersRef, where("order_status", "==", 1), where("company", "==", companiesRef));            
         const ordersSnapshot = await getDocs(ordersQuery);
@@ -56,10 +64,8 @@ onAuthStateChanged(auth, async (user) => {
                     status = '<i class="fas fa-lg fa-times text-danger"> Cancelado</i>';
                     break;
             }
-        
-            const storeRef =  doc(db, "stores", result.data().store.id); 
-            const storeSnap = await getDoc(storeRef);
-            var store = storeSnap.data().store_name;
+            
+            var store = storeArray[result.data().store.id];
 
             var dateFormat = new Date(result.data().order_date.toDate())
 
@@ -147,6 +153,7 @@ onAuthStateChanged(auth, async (user) => {
             const querySnapshot = await getDocs(ordersProductsQuery);
             
             var html = '';
+            $("#order_products").html('');
             var order_product_amount = 0;
 
             querySnapshot.forEach( async (result) => {

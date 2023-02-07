@@ -57,3 +57,23 @@ function getCookie(cname) {
     return "";
 }
 
+var x = document.getElementById("geolocationPosition");
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else { 
+        x.innerHTML = "Geolocation is not supported by this browser.";
+    }
+}
+
+function showPosition(position) {
+    const map = L.map('geolocationMap').setView([position.coords.latitude, position.coords.longitude], 13);
+
+    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    const marker = L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
+}

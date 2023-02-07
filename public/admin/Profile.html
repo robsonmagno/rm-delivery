@@ -50,6 +50,13 @@ onAuthStateChanged(auth, async (user) => {
         var company_address_zip        = companiesSnap.data().company_address_zip;
         var company_address_state      = companiesSnap.data().company_address_state;
         
+        var company_info_notify        = companiesSnap.data().company_info_notify;
+        var company_info_email         = companiesSnap.data().company_info_email;
+        var company_info_message       = companiesSnap.data().company_info_message;
+        var company_order_notify       = companiesSnap.data().company_order_notify;
+        var company_order_email        = companiesSnap.data().company_order_email;
+        var company_order_message      = companiesSnap.data().company_order_message;
+        
         if(company_address=="") company_address = "&nbsp;";
         if(company_address_number=="") company_address_number = "&nbsp;";
         if(company_address_district=="") company_address_district = "&nbsp;";
@@ -70,6 +77,51 @@ onAuthStateChanged(auth, async (user) => {
 
         $(".company_address").html(company_address + ", " + company_address_number + " " +company_address_district + "<br/>");
         $(".company_address").append(company_address_city + " " + company_address_state + " - " +company_address_zip);                
+
+        
+        if(company_info_notify) $("#company_info_notify").prop('checked',true);
+        if(company_info_email) $("#company_info_email").prop('checked',true);
+        if(company_info_message) $("#company_info_message").prop('checked',true);
+        if(company_order_notify) $("#company_order_notify").prop('checked',true);
+        if(company_order_email) $("#company_order_email").prop('checked',true);
+        if(company_order_message) $("#company_order_message").prop('checked',true);
+
+        var docData;
+        $(".company_settings").click(function(){
+            
+            var value = $(this).prop('checked');
+
+            switch($(this).attr('id')) {
+                case "company_info_notify":
+                    docData = {company_info_notify: value};
+                break;
+                case "company_info_email":
+                    docData = {company_info_email: value};
+                break;
+                case "company_info_message":
+                    docData = {company_info_message: value};
+                break;
+                case "company_order_notify":
+                    docData = {company_order_notify: value};
+                break;
+                case "company_order_email":
+                    docData = {company_order_email: value};
+                break;
+                case "company_order_message":
+                    docData = {company_order_message: value};
+                break;
+            }
+            
+
+
+
+            //var uid = getCookie('uid');
+            
+            //const db = getFirestore(app);
+            //const docRef = doc(db, "users", uid);
+            
+            setDoc(companiesRef, docData, { merge:true });
+        });
 
         $("#edit").click(function(){
             $(".company_nameF").hide();
@@ -290,11 +342,8 @@ onAuthStateChanged(auth, async (user) => {
                     <div class="card-body text-center">
                         <img id="user_foto" alt="avatar" class="rounded-circle img-fluid user_foto" style="width: 150px;">
                         <h5 class="my-3 company_name"></h5>
-                        <!--<p class="text-muted mb-1">Full Stack Developer</p>-->
                         <p class="text-muted mb-4 company_address"></p>
-                        <div class="d-flex justify-content-center mb-2">
-                            <button type="button" class="btn btn-outline-primary ms-1">Mensagem</button>
-                        </div>
+                        <p class="text-muted mb-1 company_phone"></p>
                     </div>
                 </div>
                 <div class="card mb-4 mb-lg-0">
@@ -392,7 +441,10 @@ onAuthStateChanged(auth, async (user) => {
                                                         <p class="text-muted mb-0">Receber Notificações quando seu pedido mudar de status</p>
                                                     </div>
                                                     <div class="col-auto">
-                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                        <label class="switch">
+                                                            <input type="checkbox" id="company_info_notify" class="company_settings">
+                                                            <span class="slider round"></span>
+                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -403,7 +455,10 @@ onAuthStateChanged(auth, async (user) => {
                                                         <p class="text-muted mb-0">Receber emails quando seu pedido mudar de status</p>
                                                     </div>
                                                     <div class="col-auto">
-                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                        <label class="switch">
+                                                            <input type="checkbox" id="company_info_email" class="company_settings">
+                                                            <span class="slider round"></span>
+                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -414,7 +469,10 @@ onAuthStateChanged(auth, async (user) => {
                                                         <p class="text-muted mb-0">Receber mensagem quando seu pedido mudar de status</p>
                                                     </div>
                                                     <div class="col-auto">
-                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                        <label class="switch">
+                                                            <input type="checkbox" id="company_info_message" class="company_settings">
+                                                            <span class="slider round"></span>
+                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -430,7 +488,10 @@ onAuthStateChanged(auth, async (user) => {
                                                         <p class="text-muted mb-0">Receber Notificações sobre promoções, descontos e atualizações</p>
                                                     </div>
                                                     <div class="col-auto">
-                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                        <label class="switch">
+                                                            <input type="checkbox" id="company_order_notify" class="company_settings">
+                                                            <span class="slider round"></span>
+                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -441,7 +502,10 @@ onAuthStateChanged(auth, async (user) => {
                                                         <p class="text-muted mb-0">Receber emails sobre promoções, descontos e atualizações</p>
                                                     </div>
                                                     <div class="col-auto">
-                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                        <label class="switch">
+                                                            <input type="checkbox" id="company_order_email" class="company_settings">
+                                                            <span class="slider round"></span>
+                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -452,7 +516,10 @@ onAuthStateChanged(auth, async (user) => {
                                                         <p class="text-muted mb-0">Receber mensagens sobre promoções, descontos e atualizações</p>
                                                     </div>
                                                     <div class="col-auto">
-                                                        <input type="checkbox" data-toggle="switchbutton" checked data-width="100">
+                                                        <label class="switch">
+                                                            <input type="checkbox" id="company_order_message" class="company_settings">
+                                                            <span class="slider round"></span>
+                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -467,26 +534,3 @@ onAuthStateChanged(auth, async (user) => {
         </div>
     </div>
 </section>
-
-<script>
-    var x = document.getElementById("geolocationPosition");
-
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition);
-        } else { 
-            x.innerHTML = "Geolocation is not supported by this browser.";
-        }
-    }
-
-    function showPosition(position) {
-        const map = L.map('geolocationMap').setView([position.coords.latitude, position.coords.longitude], 13);
-
-        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-
-        const marker = L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
-    }
-</script>
